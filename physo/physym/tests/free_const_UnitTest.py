@@ -45,7 +45,7 @@ class FreeConstUtilsTest(unittest.TestCase):
             params_init = 1. * torch.ones(n_params, ).to(DEVICE)
             params = params_init
 
-            history = free_const.optimize_free_const ( func     = func_params,
+            history = free_const.optimize_free_const (     func     = func_params,
                                                            params   = params,
                                                            y_target = y_target,
                                                            loss        = "MSE",
@@ -58,7 +58,7 @@ class FreeConstUtilsTest(unittest.TestCase):
         print("LBFGS const opti: %f ms / step" %(dt))
 
         # ------ Test ------
-        obs_params   = params.cpu().detach().numpy()
+        obs_params   = params.detach().cpu().numpy()
         ideal_params = np.array(ideal_params)
         for i in range (n_params):
             err = np.abs(obs_params[0] - ideal_params[0])
@@ -128,7 +128,7 @@ class FreeConstUtilsTest(unittest.TestCase):
         my_programs = Prog.VectPrograms(batch_size=test_programs_idx.shape[0], max_time_step=test_programs_idx.shape[1], library=my_lib)
 
         # Sending free constants to device
-        my_programs.free_consts.values.to(DEVICE)
+        my_programs.free_consts.values = my_programs.free_consts.values.to(DEVICE)
 
         # Appending tokens
         for i in range (test_programs_idx.shape[1]):

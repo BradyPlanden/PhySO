@@ -3,6 +3,9 @@
 
 The physical symbolic regression ( $\Phi$-SO ) package `physo` is a symbolic regression package that fully leverages physical units constraints. For more details see: [[Tenachi et al 2023]](https://arxiv.org/abs/2303.03192).
 
+https://user-images.githubusercontent.com/63928316/225642347-a07127da-a84e-4af3-96f4-4c7fef5a673b.mp4
+
+
 # Installation
 
 ### Virtual environment
@@ -22,22 +25,18 @@ Installing essential dependencies :
 ```
 conda install --file requirements.txt
 ```
-Installing optional dependencies (for monitoring plots) :
+Installing optional dependencies (for advanced debugging in tree representation) :
 ```
-pip install -r requirements_display.txt
+conda install --file requirements_display1.txt
 ```
-#####  Side note for ARM users:
+```
+pip install -r requirements_display2.txt
+```
 
-The file `requirements_display.txt` contains dependencies that can be installed via pip only. However, it also contains `pygraphviz` which can be installed via conda which avoids compiler issues on ARM. 
+#####  Side note regarding CUDA acceleration:
 
-It is recommended to run:
-```
-conda install pygraphviz==1.9
-```
-before running:
-```
-pip install -r requirements_display.txt
-```
+$\Phi$-SO supports CUDA but it should be noted that since the bottleneck of the code is free constant optimization, using CUDA (even on a very high-end GPU) does not improve performances over a CPU and can actually hinder performances.
+
 ### Installing $\Phi$-SO
 
 Installing `physo` (from the repository root):
@@ -60,13 +59,13 @@ From the repository root:
 ```
 python -m unittest discover -p "*UnitTest.py"
 ```
-This should result in all tests being successfully passed (except for plots tests if dependencies were not installed). 
+This should result in all tests being successfully passed (except for program_display_UnitTest tests if optional dependencies were not installed). 
 
 # Getting started
 
 ### Symbolic regression with default hyperparameters
 [Coming soon] 
-In the meantime you can have a look a our demo folder ! :)
+In the meantime you can have a look at our demo folder ! :)
 ### Symbolic regression
 [Coming soon]
 ### Custom symbolic optimization task
@@ -76,6 +75,31 @@ In the meantime you can have a look a our demo folder ! :)
 ### Open training loop
 [Coming soon]
 
+# About performances
+
+The main performance bottleneck of `physo` is free constant optimization, therefore, performances are almost linearly dependent on the number of free constant optimization steps and on the number of trial expressions per epoch (ie. the batch size).
+
+In addition, it should be noted that generating monitoring plots takes ~3s, therefore we suggest making monitoring plots every >10 epochs for low time / epoch cases. 
+
+Summary of expected performances with `physo`:
+
+| Time / epoch | Batch size | # free const | free const <br>opti steps | Example                             | Device                                      |
+|--------------|------------|--------------|---------------------------|-------------------------------------|---------------------------------------------|
+| ~20s         | 10k        | 2            | 15                        | eg: demo_damped_harmonic_oscillator | CPU: Mac M1 <br>RAM: 16 Go                  |
+| ~30s         | 10k        | 2            | 15                        | eg: demo_damped_harmonic_oscillator | CPU: Intel W-2155 10c/20t <br>RAM: 128 Go   |
+| ~250s        | 10k        | 2            | 15                        | eg: demo_damped_harmonic_oscillator | GPU: Nvidia GV100 <br>VRAM : 32 Go          |
+| ~3s          | 1k         | 2            | 15                        | eg: demo_mechanical_energy          | CPU: Mac M1 <br>RAM: 16 Go                  |
+| ~3s          | 1k         | 2            | 15                        | eg: demo_mechanical_energy          | CPU: Intel W-2155 10c/20t <br>RAM: 128 Go   |
+| ~4s          | 1k         | 2            | 15                        | eg: demo_mechanical_energy          | GPU: Nvidia GV100 <br>VRAM : 32 Go          |
+
+Please note that using a CPU typically results in higher performances than when using a GPU.
+
+# Uninstalling
+Uninstalling the package.
+```
+conda deactivate
+conda env remove -n PhySO
+```
 
 # Citing this work
 
