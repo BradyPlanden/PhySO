@@ -6,16 +6,16 @@ import warnings
 from physo.config.config0 import config0
 import physo.learn.monitoring as monitoring
 from physo.task.fit import fit
-from physo.physym import reward
+import physo.physym.execute as exec
 
 # DEFAULT RUN CONFIG TO USE
 default_config = config0
 
 # DEFAULT MONITORING CONFIG TO USE
-default_run_logger     = monitoring.RunLogger(
+get_default_run_logger = lambda : monitoring.RunLogger(
                                       save_path = 'SR.log',
                                       do_save   = True)
-default_run_visualiser = monitoring.RunVisualiser (
+get_default_run_visualiser = lambda : monitoring.RunVisualiser (
                                            epoch_refresh_rate = 1,
                                            save_path = 'SR_curves.png',
                                            do_show   = False,
@@ -47,8 +47,8 @@ def SR(X, y,
        # Default run config to use
        run_config = default_config,
        # Default run monitoring
-       run_logger     = default_run_logger,
-       run_visualiser = default_run_visualiser,
+       get_run_logger     = get_default_run_logger,
+       get_run_visualiser = get_default_run_visualiser,
        ):
     """
     Runs a symbolic regression task with default hyperparameters config.
@@ -93,10 +93,10 @@ def SR(X, y,
         Number of epochs to perform. By default, uses the number in the default config file.
     run_config : dict (optional)
         Run configuration (by default uses physo.task.sr.default_config)
-    run_logger : physo.learn.monitoring.RunLogger (optional)
-        Run logger (by default uses physo.task.sr.default_run_logger)
-    run_visualiser : physo.learn.monitoring.RunVisualiser (optional)
-        Run visualiser (by default uses physo.task.sr.default_run_logger)
+    get_run_logger : callable returning physo.learn.monitoring.RunLogger (optional)
+        Run logger (by default uses physo.task.sr.get_default_run_logger)
+    get_run_visualiser : callable returning physo.learn.monitoring.RunVisualiser (optional)
+        Run visualiser (by default uses physo.task.sr.get_default_run_visualiser)
 
     Returns
     -------
@@ -228,6 +228,8 @@ def SR(X, y,
                     }
 
     # Monitoring
+    run_logger     = get_run_logger()
+    run_visualiser = get_run_visualiser()
     run_config.update({
         "library_config"       : library_config,
         "run_logger"           : run_logger,
@@ -239,7 +241,7 @@ def SR(X, y,
         run_config["learning_config"]["n_epochs"] = epochs
 
     # Show progress bar
-    reward.SHOW_PROGRESS_BAR = True
+    exec.SHOW_PROGRESS_BAR = True
 
     # ------------------------------- RUN -------------------------------
 
